@@ -45,7 +45,8 @@
     "coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "check-exports": "attw --pack .",
-    "release": "pnpm run build && changeset publish"
+    "release": "pnpm run build && changeset publish",
+    "changeset": "changeset"
   },
   "dependencies": {
     "ky": "^1.14.1"
