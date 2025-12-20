@@ -1,5 +1,5 @@
 ---
-"gocardless-open-banking": minor
+"gocardless-open-banking": major
 ---
 
 Initial release of GoCardless Open Banking SDK
