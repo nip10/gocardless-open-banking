@@ -1,13 +1,45 @@
-.changeset
-.github
-lib
-node_modules
-tests
-.eslintrc.js
-.gitignore
-.prettierrc
-CHANGELOG.md
-LICENSE
-index.ts
-tscconfig.json
+# Source files (publish dist/ only)
+src/
+tests/
+examples/
+scripts/
+
+# Configuration files
+tsconfig.json
 vitest.config.ts
+eslint.config.mjs
+.prettierrc
+.prettierignore
+.gitignore
+
+# Development files
+.github/
+.changeset/
+.vscode/
+.idea/
+
+# Documentation to exclude
+CONTRIBUTING.md
+
+# Environment and temp files
+.env
+.env.*
+*.log
+.DS_Store
+
+# Coverage and test reports
+coverage/
+
+# Build artifacts
+*.tsbuildinfo
+node_modules/
+
+# Spec and docs
+docs/
+
+# Keep these files (explicitly not ignoring):
+# - README.md (included by default)
+# - LICENSE (included by default)
+# - CHANGELOG.md (should be published)
+# - package.json (included by default)
+# - dist/ (our build output)

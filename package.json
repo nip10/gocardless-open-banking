@@ -1,19 +1,28 @@
 {
-  "name": "ts-package",
+  "name": "gocardless-open-banking",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for GoCardless Bank Account Data API v2",
+  "keywords": [
+    "gocardless",
+    "open-banking",
+    "bank-account-data",
+    "api",
+    "sdk",
+    "typescript"
+  ],
   "author": {
     "name": "Diogo Cardoso",
     "email": "hi@diogocardoso.dev"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nip10/ts-package.git"
+    "url": "https://github.com/nip10/gocardless-open-banking.git"
   },
   "bugs": {
-    "url": "https://github.com/nip10/ts-package/issues"
+    "url": "https://github.com/nip10/gocardless-open-banking/issues"
   },
-  "homepage": "https://github.com/nip10/ts-package#readme",
+  "homepage": "https://github.com/nip10/gocardless-open-banking#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -27,7 +36,9 @@
     }
   },
   "scripts": {
-    "build": "tsup",
+    "generate:types": "openapi-ts -i ./docs/spec.json -o ./src/types/generated -c @hey-api/client-ky && node scripts/fix-generated-imports.js",
+    "build": "pnpm generate:types && tsup",
+    "dev": "pnpm generate:types && tsup --watch",
     "lint": "eslint .",
     "format": "prettier . --write",
     "test": "vitest run",
@@ -36,14 +47,20 @@
     "check-exports": "attw --pack .",
     "release": "pnpm run build && changeset publish"
   },
+  "dependencies": {
+    "ky": "^1.7.3"
+  },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@changesets/cli": "^2.29.7",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.39.1",
+    "@hey-api/openapi-ts": "0.89.2",
     "@total-typescript/ts-reset": "^0.6.1",
+    "@types/node": "^20.17.10",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
     "@typescript-eslint/parser": "^8.46.3",
+    "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.8",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
@@ -55,5 +72,8 @@
     "typescript-eslint": "^8.46.3",
     "vitest": "^4.0.8",
     "vitest-github-actions-reporter": "^0.11.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
