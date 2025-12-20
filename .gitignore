@@ -1,3 +1,40 @@
+# Dependencies
 node_modules
+
+# Build output
 dist
 html
+
+# Generated types
+src/types/generated/
+
+# Coverage
+coverage
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Build info
+*.tsbuildinfo
+
+# Package manager
+.pnpm-store
