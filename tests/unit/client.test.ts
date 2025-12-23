@@ -60,6 +60,7 @@ describe('GoCardlessClient', () => {
           respectRetryAfter: true,
         },
         undefined, // No interceptors
+        undefined, // No onRateLimit callback
       );
 
       // Verify all resources were created
@@ -92,6 +93,7 @@ describe('GoCardlessClient', () => {
         30000,
         expect.anything(),
         undefined,
+        undefined,
       );
     });
 
@@ -109,6 +111,7 @@ describe('GoCardlessClient', () => {
         expect.anything(),
         60000,
         expect.anything(),
+        undefined,
         undefined,
       );
     });
@@ -136,6 +139,7 @@ describe('GoCardlessClient', () => {
         expect.anything(),
         expect.anything(),
         customRetryConfig,
+        undefined,
         undefined,
       );
     });
@@ -165,6 +169,7 @@ describe('GoCardlessClient', () => {
           respectRetryAfter: true,
         },
         undefined,
+        undefined,
       );
     });
 
@@ -190,6 +195,7 @@ describe('GoCardlessClient', () => {
         {
           request: [requestInterceptor],
         },
+        undefined,
       );
     });
 
@@ -215,6 +221,7 @@ describe('GoCardlessClient', () => {
         {
           response: [responseInterceptor],
         },
+        undefined,
       );
     });
 
@@ -243,6 +250,7 @@ describe('GoCardlessClient', () => {
           request: [requestInterceptor],
           response: [responseInterceptor],
         },
+        undefined,
       );
     });
 
@@ -291,6 +299,7 @@ describe('GoCardlessClient', () => {
           request: [requestInterceptor],
           response: [responseInterceptor],
         },
+        undefined,
       );
     });
   });
@@ -331,6 +340,15 @@ describe('GoCardlessClient', () => {
       expect(client.agreements).toBe(agreements);
       expect(client.institutions).toBe(institutions);
     });
+
+    it('should expose getLastRateLimitInfo method', () => {
+      expect(client.getLastRateLimitInfo).toBeDefined();
+      expect(typeof client.getLastRateLimitInfo).toBe('function');
+
+      // Should delegate to httpClient
+      const result = client.getLastRateLimitInfo();
+      expect(result).toBeUndefined(); // No requests made yet
+    });
   });
 
   describe('edge cases', () => {
@@ -348,6 +366,7 @@ describe('GoCardlessClient', () => {
         expect.anything(),
         0,
         expect.anything(),
+        undefined,
         undefined,
       );
     });
@@ -374,6 +393,7 @@ describe('GoCardlessClient', () => {
           respectRetryAfter: true,
         },
         undefined,
+        undefined,
       );
     });
 
@@ -392,6 +412,7 @@ describe('GoCardlessClient', () => {
         expect.anything(),
         expect.anything(),
         {},
+        undefined,
       );
     });
 
@@ -418,6 +439,7 @@ describe('GoCardlessClient', () => {
         {
           request: [interceptor1, interceptor2, interceptor3],
         },
+        undefined,
       );
     });
 
@@ -443,6 +465,7 @@ describe('GoCardlessClient', () => {
         {
           response: [interceptor1, interceptor2],
         },
+        undefined,
       );
     });
   });

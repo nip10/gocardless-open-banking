@@ -284,6 +284,140 @@ const client = new GoCardlessClient({
 });
 ```
 
+## Rate Limiting
+
+The GoCardless API enforces rate limits to ensure fair usage. The SDK provides comprehensive rate limiting support to help you stay within limits.
+
+### Rate Limit Headers
+
+The API returns rate limit information in response headers:
+
+- **General Rate Limits**:
+  - `X-RateLimit-Limit`: Total requests allowed per day
+  - `X-RateLimit-Remaining`: Remaining requests for today
+  - `X-RateLimit-Reset`: Unix timestamp when the limit resets
+
+- **Account Success Rate Limits** (for successful account data requests):
+  - `X-RateLimit-Account-Success-Limit`: Total successful account requests allowed per day
+  - `X-RateLimit-Account-Success-Remaining`: Remaining successful requests
+  - `X-RateLimit-Account-Success-Reset`: Unix timestamp when the account limit resets
+
+### Monitoring Rate Limits
+
+#### Get Last Rate Limit Info
+
+```typescript
+// Make a request
+const institutions = await client.institutions.list('GB');
+
+// Check rate limit status
+const rateLimit = client.getLastRateLimitInfo();
+
+if (rateLimit?.general) {
+  console.log(`Requests remaining: ${rateLimit.general.remaining}/${rateLimit.general.limit}`);
+
+  const resetDate = new Date(rateLimit.general.reset * 1000);
+  console.log(`Limit resets at: ${resetDate.toISOString()}`);
+}
+
+if (rateLimit?.accountSuccess) {
+  console.log(`Account success requests remaining: ${rateLimit.accountSuccess.remaining}/${rateLimit.accountSuccess.limit}`);
+}
+```
+
+#### Using the onRateLimit Callback
+
+For real-time rate limit monitoring, use the `onRateLimit` callback:
+
+```typescript
+const client = new GoCardlessClient({
+  secretId: process.env.GOCARDLESS_SECRET_ID!,
+  secretKey: process.env.GOCARDLESS_SECRET_KEY!,
+
+  // Called whenever rate limit headers are received
+  onRateLimit: (rateLimit) => {
+    if (rateLimit.general) {
+      console.log(`[Rate Limit] ${rateLimit.general.remaining}/${rateLimit.general.limit} requests remaining`);
+
+      // Alert when approaching limit
+      if (rateLimit.general.remaining < 10) {
+        console.warn('Warning: Approaching rate limit!');
+      }
+    }
+
+    if (rateLimit.accountSuccess) {
+      console.log(`[Account Limit] ${rateLimit.accountSuccess.remaining}/${rateLimit.accountSuccess.limit} remaining`);
+    }
+  },
+});
+```
+
+### Handling Rate Limit Errors
+
+When you exceed the rate limit, the API returns a `429 Too Many Requests` error:
+
+```typescript
+import { GoCardlessAPIError } from 'gocardless-open-banking';
+
+try {
+  const accounts = await client.accounts.get('account-id');
+} catch (error) {
+  if (error instanceof GoCardlessAPIError && error.code === 'RATE_LIMIT_EXCEEDED') {
+    // Get retry-after time from error detail
+    const retryAfter = error.getRetryAfter();
+
+    if (retryAfter) {
+      console.log(`Rate limited. Retry after ${retryAfter} seconds`);
+
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+
+      // Retry the request
+      const accounts = await client.accounts.get('account-id');
+    }
+
+    // Check rate limit info from the error
+    if (error.rateLimit?.general) {
+      const resetDate = new Date(error.rateLimit.general.reset * 1000);
+      console.log(`Rate limit resets at: ${resetDate.toISOString()}`);
+    }
+  }
+}
+```
+
+### Best Practices
+
+1. **Monitor Rate Limits Proactively**:
+   ```typescript
+   const rateLimit = client.getLastRateLimitInfo();
+
+   if (rateLimit?.general?.remaining && rateLimit.general.remaining < 100) {
+     console.warn('Low rate limit remaining, consider throttling requests');
+   }
+   ```
+
+2. **Implement Exponential Backoff**:
+   ```typescript
+   const client = new GoCardlessClient({
+     secretId: process.env.GOCARDLESS_SECRET_ID!,
+     secretKey: process.env.GOCARDLESS_SECRET_KEY!,
+     retry: {
+       maxRetries: 3,
+       backoff: 'exponential', // Better for rate limits
+       respectRetryAfter: true, // Honor API's retry-after time
+     },
+   });
+   ```
+
+3. **Batch Requests Efficiently**:
+   ```typescript
+   // Use pagination to limit requests
+   const requisitions = await client.requisitions.list({
+     limit: 100, // Get more data per request
+     offset: 0,
+   });
+   ```
+
 ## Error Handling
 
 The SDK throws `GoCardlessAPIError` for all API-related errors.
@@ -329,13 +463,17 @@ try {
 | `ACCOUNT_NOT_FOUND` | 404 | Account ID does not exist |
 | `REQUISITION_NOT_FOUND` | 404 | Requisition ID does not exist |
 | `AGREEMENT_NOT_FOUND` | 404 | Agreement ID does not exist |
-| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
+| `VALIDATION_ERROR` | 400 | Invalid request data |
 | `AUTHENTICATION_FAILED` | 401 | Invalid credentials |
+| `PAYMENT_REQUIRED` | 402 | Free usage limit exceeded |
 | `FORBIDDEN` | 403 | Access denied |
 | `IP_NOT_WHITELISTED` | 403 | IP address not allowed |
-| `VALIDATION_ERROR` | 400 | Invalid request data |
+| `CONFLICT` | 409 | Account suspended or processing delay |
+| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
 | `INTERNAL_SERVER_ERROR` | 500 | Server error |
+| `BAD_GATEWAY` | 502 | Bad gateway |
 | `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+| `GATEWAY_TIMEOUT` | 504 | Gateway timeout |
 
 ## TypeScript Support
 

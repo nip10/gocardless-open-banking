@@ -139,6 +139,8 @@ export class TokenManager {
         if (error instanceof Error && 'response' in error) {
           const response = error.response as Response;
           if (response.status === 401) {
+            // Clear refreshPromise before calling generateTokenPair to avoid circular reference
+            this.refreshPromise = null;
             return this.generateTokenPair();
           }
           const body = (await response.json().catch(() => ({}))) as {

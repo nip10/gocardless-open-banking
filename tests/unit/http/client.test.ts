@@ -35,6 +35,16 @@ vi.mock('../../../src/utils/backoff', async () => {
   };
 });
 
+// Helper to create mock Headers object
+function createMockHeaders(headers: Record<string, string> = {}): Headers {
+  const mockHeaders = new Map(Object.entries(headers));
+  return {
+    get: (name: string) => mockHeaders.get(name.toLowerCase()) || null,
+    has: (name: string) => mockHeaders.has(name.toLowerCase()),
+    entries: () => mockHeaders.entries(),
+  } as Headers;
+}
+
 describe('HttpClient', () => {
   let httpClient: HttpClient;
   let mockTokenManager: TokenManager;
@@ -116,6 +126,7 @@ describe('HttpClient', () => {
 
         mockKy.mockResolvedValue({
           json: vi.fn().mockResolvedValue(mockData),
+          headers: createMockHeaders(),
         });
 
         const result = await httpClient.get('/test');
@@ -134,6 +145,7 @@ describe('HttpClient', () => {
 
         mockKy.mockResolvedValue({
           json: vi.fn().mockResolvedValue(mockData),
+          headers: createMockHeaders(),
         });
 
         await httpClient.get('/test', { searchParams: { foo: 'bar' } });
@@ -155,6 +167,7 @@ describe('HttpClient', () => {
 
         mockKy.mockResolvedValue({
           json: vi.fn().mockResolvedValue(mockData),
+          headers: createMockHeaders(),
         });
 
         const result = await httpClient.post('/test', requestBody);
@@ -174,6 +187,7 @@ describe('HttpClient', () => {
 
         mockKy.mockResolvedValue({
           json: vi.fn().mockResolvedValue(mockData),
+          headers: createMockHeaders(),
         });
 
         const result = await httpClient.post('/test');
@@ -196,6 +210,7 @@ describe('HttpClient', () => {
 
         mockKy.mockResolvedValue({
           json: vi.fn().mockResolvedValue(mockData),
+          headers: createMockHeaders(),
         });
 
         const result = await httpClient.put('/test', requestBody);
@@ -217,6 +232,7 @@ describe('HttpClient', () => {
 
         mockKy.mockResolvedValue({
           json: vi.fn().mockResolvedValue(mockData),
+          headers: createMockHeaders(),
         });
 
         const result = await httpClient.delete('/test');
@@ -335,6 +351,7 @@ describe('HttpClient', () => {
           summary: 'Rate limit exceeded',
           detail: 'Please try again in 60 seconds',
         }),
+        headers: createMockHeaders(),
       };
 
       const mockData = { success: true };
@@ -344,6 +361,7 @@ describe('HttpClient', () => {
         .mockRejectedValueOnce(error)
         .mockResolvedValueOnce({
           json: vi.fn().mockResolvedValue(mockData),
+          headers: createMockHeaders(),
         });
 
       const result = await httpClient.get('/test');
@@ -368,12 +386,14 @@ describe('HttpClient', () => {
           summary: 'Rate limit exceeded',
           detail: 'Please try again in 60 seconds',
         }),
+        headers: createMockHeaders(),
       };
 
       const mockData = { success: true };
 
       mockKy.mockRejectedValueOnce(error).mockResolvedValueOnce({
         json: vi.fn().mockResolvedValue(mockData),
+        headers: createMockHeaders(),
       });
 
       await httpClient.get('/test');
@@ -389,6 +409,7 @@ describe('HttpClient', () => {
           summary: 'Not found',
           detail: 'Resource not found',
         }),
+        headers: createMockHeaders(),
       };
 
       mockKy.mockRejectedValue(error);
@@ -408,6 +429,7 @@ describe('HttpClient', () => {
           summary: 'Rate limit exceeded',
           detail: 'Too many requests',
         }),
+        headers: createMockHeaders(),
       };
 
       mockKy.mockRejectedValue(error);
@@ -436,6 +458,7 @@ describe('HttpClient', () => {
           summary: 'Rate limit exceeded',
           detail: 'Too many requests',
         }),
+        headers: createMockHeaders(),
       };
 
       mockKy.mockRejectedValue(error);
@@ -463,6 +486,7 @@ describe('HttpClient', () => {
           summary: 'Rate limit exceeded',
           detail: 'Please try again in 60 seconds', // 60 seconds
         }),
+        headers: createMockHeaders(),
       };
 
       mockKy.mockRejectedValue(error);
@@ -486,6 +510,7 @@ describe('HttpClient', () => {
           summary: 'Internal Server Error',
           detail: 'Something went wrong',
         }),
+        headers: createMockHeaders(),
       };
 
       mockKy.mockRejectedValue(error);
@@ -504,6 +529,7 @@ describe('HttpClient', () => {
       (error as any).response = {
         status: 500,
         json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
+        headers: createMockHeaders(),
       };
 
       mockKy.mockRejectedValue(error);
@@ -529,6 +555,7 @@ describe('HttpClient', () => {
           summary: 'Rate limit exceeded',
           detail: 'Please try again in 30 seconds',
         }),
+        headers: createMockHeaders(),
       };
 
       mockKy.mockRejectedValue(error);
@@ -557,12 +584,15 @@ describe('HttpClient', () => {
       mockKy
         .mockResolvedValueOnce({
           json: vi.fn().mockResolvedValue(mockData1),
+          headers: createMockHeaders(),
         })
         .mockResolvedValueOnce({
           json: vi.fn().mockResolvedValue(mockData2),
+          headers: createMockHeaders(),
         })
         .mockResolvedValueOnce({
           json: vi.fn().mockResolvedValue(mockData3),
+          headers: createMockHeaders(),
         });
 
       const [result1, result2, result3] = await Promise.all([
@@ -580,6 +610,7 @@ describe('HttpClient', () => {
     it('should handle empty response body', async () => {
       mockKy.mockResolvedValue({
         json: vi.fn().mockResolvedValue(null),
+        headers: createMockHeaders(),
       });
 
       const result = await httpClient.get('/test');
@@ -596,15 +627,19 @@ describe('HttpClient', () => {
       mockKy
         .mockResolvedValueOnce({
           json: vi.fn().mockResolvedValue(getData),
+          headers: createMockHeaders(),
         })
         .mockResolvedValueOnce({
           json: vi.fn().mockResolvedValue(postData),
+          headers: createMockHeaders(),
         })
         .mockResolvedValueOnce({
           json: vi.fn().mockResolvedValue(putData),
+          headers: createMockHeaders(),
         })
         .mockResolvedValueOnce({
           json: vi.fn().mockResolvedValue(deleteData),
+          headers: createMockHeaders(),
         });
 
       await httpClient.get('/test');
@@ -632,6 +667,257 @@ describe('HttpClient', () => {
         '/test',
         expect.objectContaining({ method: 'DELETE' }),
       );
+    });
+  });
+
+  describe('rate limiting', () => {
+    it('should capture rate limit info from successful response headers', async () => {
+      httpClient = new HttpClient(mockTokenManager, BASE_URL, TIMEOUT, {});
+
+      const mockData = { id: '123' };
+      const rateLimitHeaders = {
+        'x-ratelimit-limit': '100',
+        'x-ratelimit-remaining': '95',
+        'x-ratelimit-reset': '1640000000',
+      };
+
+      mockKy.mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockData),
+        headers: createMockHeaders(rateLimitHeaders),
+      });
+
+      await httpClient.get('/test');
+
+      const rateLimit = httpClient.getLastRateLimitInfo();
+      expect(rateLimit).toBeDefined();
+      expect(rateLimit?.general).toEqual({
+        limit: 100,
+        remaining: 95,
+        reset: 1640000000,
+      });
+    });
+
+    it('should capture account success rate limit headers', async () => {
+      httpClient = new HttpClient(mockTokenManager, BASE_URL, TIMEOUT, {});
+
+      const mockData = { balance: 1000 };
+      const rateLimitHeaders = {
+        'x-ratelimit-account-success-limit': '50',
+        'x-ratelimit-account-success-remaining': '48',
+        'x-ratelimit-account-success-reset': '1640000000',
+      };
+
+      mockKy.mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockData),
+        headers: createMockHeaders(rateLimitHeaders),
+      });
+
+      await httpClient.get('/accounts/123/balances');
+
+      const rateLimit = httpClient.getLastRateLimitInfo();
+      expect(rateLimit).toBeDefined();
+      expect(rateLimit?.accountSuccess).toEqual({
+        limit: 50,
+        remaining: 48,
+        reset: 1640000000,
+      });
+    });
+
+    it('should capture both general and account success headers', async () => {
+      httpClient = new HttpClient(mockTokenManager, BASE_URL, TIMEOUT, {});
+
+      const mockData = { transactions: [] };
+      const rateLimitHeaders = {
+        'x-ratelimit-limit': '100',
+        'x-ratelimit-remaining': '95',
+        'x-ratelimit-reset': '1640000000',
+        'x-ratelimit-account-success-limit': '50',
+        'x-ratelimit-account-success-remaining': '48',
+        'x-ratelimit-account-success-reset': '1640000100',
+      };
+
+      mockKy.mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockData),
+        headers: createMockHeaders(rateLimitHeaders),
+      });
+
+      await httpClient.get('/accounts/123/transactions');
+
+      const rateLimit = httpClient.getLastRateLimitInfo();
+      expect(rateLimit).toBeDefined();
+      expect(rateLimit?.general).toEqual({
+        limit: 100,
+        remaining: 95,
+        reset: 1640000000,
+      });
+      expect(rateLimit?.accountSuccess).toEqual({
+        limit: 50,
+        remaining: 48,
+        reset: 1640000100,
+      });
+    });
+
+    it('should invoke onRateLimit callback when rate limit headers present', async () => {
+      const onRateLimit = vi.fn();
+      httpClient = new HttpClient(
+        mockTokenManager,
+        BASE_URL,
+        TIMEOUT,
+        {},
+        undefined,
+        onRateLimit,
+      );
+
+      const mockData = { id: '123' };
+      const rateLimitHeaders = {
+        'x-ratelimit-limit': '100',
+        'x-ratelimit-remaining': '95',
+        'x-ratelimit-reset': '1640000000',
+      };
+
+      mockKy.mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockData),
+        headers: createMockHeaders(rateLimitHeaders),
+      });
+
+      await httpClient.get('/test');
+
+      expect(onRateLimit).toHaveBeenCalledTimes(1);
+      expect(onRateLimit).toHaveBeenCalledWith({
+        general: {
+          limit: 100,
+          remaining: 95,
+          reset: 1640000000,
+        },
+      });
+    });
+
+    it('should not invoke callback when no rate limit headers present', async () => {
+      const onRateLimit = vi.fn();
+      httpClient = new HttpClient(
+        mockTokenManager,
+        BASE_URL,
+        TIMEOUT,
+        {},
+        undefined,
+        onRateLimit,
+      );
+
+      const mockData = { id: '123' };
+
+      mockKy.mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockData),
+        headers: createMockHeaders(),
+      });
+
+      await httpClient.get('/test');
+
+      expect(onRateLimit).not.toHaveBeenCalled();
+    });
+
+    it('should capture rate limit info from error responses', async () => {
+      const onRateLimit = vi.fn();
+      httpClient = new HttpClient(
+        mockTokenManager,
+        BASE_URL,
+        TIMEOUT,
+        { maxRetries: 0 }, // Disable retries to test callback once
+        undefined,
+        onRateLimit,
+      );
+
+      const error = new Error('Too Many Requests') as HTTPError;
+      const rateLimitHeaders = {
+        'x-ratelimit-limit': '100',
+        'x-ratelimit-remaining': '0',
+        'x-ratelimit-reset': '1640000000',
+      };
+
+      (error as any).response = {
+        status: 429,
+        json: vi.fn().mockResolvedValue({
+          summary: 'Rate limit exceeded',
+          detail: 'Please try again in 60 seconds',
+        }),
+        headers: createMockHeaders(rateLimitHeaders),
+      };
+
+      mockKy.mockRejectedValue(error);
+
+      try {
+        await httpClient.get('/test');
+      } catch {
+        // Expected to throw
+      }
+
+      expect(onRateLimit).toHaveBeenCalledTimes(1);
+      expect(onRateLimit).toHaveBeenCalledWith({
+        general: {
+          limit: 100,
+          remaining: 0,
+          reset: 1640000000,
+        },
+      });
+
+      const rateLimit = httpClient.getLastRateLimitInfo();
+      expect(rateLimit?.general?.remaining).toBe(0);
+    });
+
+    it('should return undefined when no rate limit has been captured', () => {
+      httpClient = new HttpClient(mockTokenManager, BASE_URL, TIMEOUT, {});
+
+      const rateLimit = httpClient.getLastRateLimitInfo();
+      expect(rateLimit).toBeUndefined();
+    });
+
+    it('should update rate limit on each request', async () => {
+      httpClient = new HttpClient(mockTokenManager, BASE_URL, TIMEOUT, {});
+
+      // First request
+      mockKy.mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValue({ id: '1' }),
+        headers: createMockHeaders({
+          'x-ratelimit-remaining': '100',
+        }),
+      });
+
+      await httpClient.get('/test1');
+      let rateLimit = httpClient.getLastRateLimitInfo();
+      expect(rateLimit?.general?.remaining).toBe(100);
+
+      // Second request with updated headers
+      mockKy.mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValue({ id: '2' }),
+        headers: createMockHeaders({
+          'x-ratelimit-remaining': '99',
+        }),
+      });
+
+      await httpClient.get('/test2');
+      rateLimit = httpClient.getLastRateLimitInfo();
+      expect(rateLimit?.general?.remaining).toBe(99);
+    });
+
+    it('should handle invalid rate limit header values', async () => {
+      httpClient = new HttpClient(mockTokenManager, BASE_URL, TIMEOUT, {});
+
+      const mockData = { id: '123' };
+      const invalidHeaders = {
+        'x-ratelimit-limit': 'invalid', // Not a number
+        'x-ratelimit-remaining': 'abc', // Not a number
+        'x-ratelimit-reset': 'xyz', // Not a number
+      };
+
+      mockKy.mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockData),
+        headers: createMockHeaders(invalidHeaders),
+      });
+
+      await httpClient.get('/test');
+
+      // Should not capture invalid headers
+      const rateLimit = httpClient.getLastRateLimitInfo();
+      expect(rateLimit).toBeUndefined();
     });
   });
 });
