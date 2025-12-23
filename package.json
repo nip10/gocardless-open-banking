@@ -1,7 +1,7 @@
 {
   "name": "gocardless-open-banking",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "TypeScript SDK for GoCardless Bank Account Data API v2",
   "keywords": [
     "gocardless",

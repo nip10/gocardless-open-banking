@@ -1,5 +1,11 @@
 # gocardless-open-banking
 
+## 1.0.2
+
+### Patch Changes
+
+- 196530f: Fixed circular promise deadlock bug in TokenManager when refresh token returns 401 status. The manager now properly clears the refresh promise before regenerating token pairs, preventing infinite loops.
+
 ## 1.0.1
 
 ### Patch Changes
