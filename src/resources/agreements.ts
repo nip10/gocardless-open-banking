@@ -24,14 +24,15 @@ export class AgreementsResource {
     limit?: number;
     offset?: number;
   }): Promise<PaginatedEndUserAgreementList> {
-    const searchParams = new URLSearchParams();
-    if (options?.limit) searchParams.set('limit', options.limit.toString());
-    if (options?.offset) searchParams.set('offset', options.offset.toString());
-
-    const query = searchParams.toString();
-    const url = `api/v2/agreements/enduser/${query ? `?${query}` : ''}`;
-
-    return this.http.get<PaginatedEndUserAgreementList>(url);
+    return this.http.get<PaginatedEndUserAgreementList>(
+      'api/v2/agreements/enduser/',
+      {
+        searchParams: {
+          limit: options?.limit,
+          offset: options?.offset,
+        },
+      },
+    );
   }
 
   /**

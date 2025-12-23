@@ -116,7 +116,7 @@ export class GoCardlessAPIError extends Error {
     // Parse "Please try again in X seconds" from detail
     const match = this.detail.match(/try again in (\d+) second/i);
     if (match?.[1]) {
-      return parseInt(match[1], 10);
+      return Number.parseInt(match[1], 10);
     }
 
     return null;

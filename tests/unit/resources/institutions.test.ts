@@ -44,9 +44,9 @@ describe('InstitutionsResource', () => {
       const result = await institutionsResource.list('GB');
 
       expect(result).toEqual(mockInstitutions);
-      expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/institutions/?country=GB',
-      );
+      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/institutions/', {
+        searchParams: { country: 'GB' },
+      });
     });
 
     it('should list institutions for different countries', async () => {
@@ -66,9 +66,9 @@ describe('InstitutionsResource', () => {
       const result = await institutionsResource.list('DE');
 
       expect(result).toEqual(mockInstitutions);
-      expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/institutions/?country=DE',
-      );
+      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/institutions/', {
+        searchParams: { country: 'DE' },
+      });
     });
 
     it('should return empty array when no institutions found', async () => {
@@ -77,9 +77,9 @@ describe('InstitutionsResource', () => {
       const result = await institutionsResource.list('XX');
 
       expect(result).toEqual([]);
-      expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/institutions/?country=XX',
-      );
+      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/institutions/', {
+        searchParams: { country: 'XX' },
+      });
     });
 
     it('should propagate errors from http client', async () => {

@@ -23,14 +23,12 @@ export class RequisitionsResource {
     limit?: number;
     offset?: number;
   }): Promise<PaginatedRequisitionList> {
-    const searchParams = new URLSearchParams();
-    if (options?.limit) searchParams.set('limit', options.limit.toString());
-    if (options?.offset) searchParams.set('offset', options.offset.toString());
-
-    const query = searchParams.toString();
-    const url = `api/v2/requisitions/${query ? `?${query}` : ''}`;
-
-    return this.http.get<PaginatedRequisitionList>(url);
+    return this.http.get<PaginatedRequisitionList>('api/v2/requisitions/', {
+      searchParams: {
+        limit: options?.limit,
+        offset: options?.offset,
+      },
+    });
   }
 
   /**
