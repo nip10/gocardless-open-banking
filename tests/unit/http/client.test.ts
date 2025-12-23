@@ -846,7 +846,7 @@ describe('HttpClient', () => {
 
       try {
         await httpClient.get('/test');
-      } catch (err) {
+      } catch {
         // Expected to throw
       }
 
