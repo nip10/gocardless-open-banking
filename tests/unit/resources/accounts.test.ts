@@ -163,6 +163,12 @@ describe('AccountsResource', () => {
       expect(result).toEqual(mockTransactions);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
         'api/v2/accounts/acc123/transactions/',
+        {
+          searchParams: {
+            date_from: undefined,
+            date_to: undefined,
+          },
+        },
       );
     });
 
@@ -182,7 +188,13 @@ describe('AccountsResource', () => {
 
       expect(result).toEqual(mockTransactions);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/accounts/acc123/transactions/?date_from=2024-01-01',
+        'api/v2/accounts/acc123/transactions/',
+        {
+          searchParams: {
+            date_from: '2024-01-01',
+            date_to: undefined,
+          },
+        },
       );
     });
 
@@ -202,7 +214,13 @@ describe('AccountsResource', () => {
 
       expect(result).toEqual(mockTransactions);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/accounts/acc123/transactions/?date_to=2024-12-31',
+        'api/v2/accounts/acc123/transactions/',
+        {
+          searchParams: {
+            date_from: undefined,
+            date_to: '2024-12-31',
+          },
+        },
       );
     });
 
@@ -242,7 +260,13 @@ describe('AccountsResource', () => {
 
       expect(result).toEqual(mockTransactions);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/accounts/acc123/transactions/?date_from=2024-06-01&date_to=2024-06-30',
+        'api/v2/accounts/acc123/transactions/',
+        {
+          searchParams: {
+            date_from: '2024-06-01',
+            date_to: '2024-06-30',
+          },
+        },
       );
     });
 
@@ -264,6 +288,12 @@ describe('AccountsResource', () => {
       expect(result).toEqual(mockTransactions);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
         'api/v2/accounts/acc123/transactions/',
+        {
+          searchParams: {
+            date_from: undefined,
+            date_to: undefined,
+          },
+        },
       );
     });
 

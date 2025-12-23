@@ -67,7 +67,12 @@ describe('RequisitionsResource', () => {
       const result = await requisitionsResource.list();
 
       expect(result).toEqual(mockRequisitionList);
-      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/requisitions/');
+      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/requisitions/', {
+        searchParams: {
+          limit: undefined,
+          offset: undefined,
+        },
+      });
     });
 
     it('should list requisitions with limit', async () => {
@@ -83,9 +88,12 @@ describe('RequisitionsResource', () => {
       const result = await requisitionsResource.list({ limit: 10 });
 
       expect(result).toEqual(mockRequisitionList);
-      expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/requisitions/?limit=10',
-      );
+      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/requisitions/', {
+        searchParams: {
+          limit: 10,
+          offset: undefined,
+        },
+      });
     });
 
     it('should list requisitions with offset', async () => {
@@ -101,9 +109,12 @@ describe('RequisitionsResource', () => {
       const result = await requisitionsResource.list({ offset: 20 });
 
       expect(result).toEqual(mockRequisitionList);
-      expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/requisitions/?offset=20',
-      );
+      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/requisitions/', {
+        searchParams: {
+          limit: undefined,
+          offset: 20,
+        },
+      });
     });
 
     it('should list requisitions with limit and offset', async () => {
@@ -119,9 +130,12 @@ describe('RequisitionsResource', () => {
       const result = await requisitionsResource.list({ limit: 10, offset: 20 });
 
       expect(result).toEqual(mockRequisitionList);
-      expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/requisitions/?limit=10&offset=20',
-      );
+      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/requisitions/', {
+        searchParams: {
+          limit: 10,
+          offset: 20,
+        },
+      });
     });
 
     it('should ignore undefined pagination options', async () => {
@@ -140,7 +154,12 @@ describe('RequisitionsResource', () => {
       });
 
       expect(result).toEqual(mockRequisitionList);
-      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/requisitions/');
+      expect(mockHttpClient.get).toHaveBeenCalledWith('api/v2/requisitions/', {
+        searchParams: {
+          limit: undefined,
+          offset: undefined,
+        },
+      });
     });
 
     it('should propagate errors from http client', async () => {

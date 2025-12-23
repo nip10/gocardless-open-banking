@@ -59,13 +59,14 @@ export class AccountsResource {
     accountId: string,
     options?: { dateFrom?: string; dateTo?: string },
   ): Promise<AccountTransactions> {
-    const searchParams = new URLSearchParams();
-    if (options?.dateFrom) searchParams.set('date_from', options.dateFrom);
-    if (options?.dateTo) searchParams.set('date_to', options.dateTo);
-
-    const query = searchParams.toString();
-    const url = `api/v2/accounts/${accountId}/transactions/${query ? `?${query}` : ''}`;
-
-    return this.http.get<AccountTransactions>(url);
+    return this.http.get<AccountTransactions>(
+      `api/v2/accounts/${accountId}/transactions/`,
+      {
+        searchParams: {
+          date_from: options?.dateFrom,
+          date_to: options?.dateTo,
+        },
+      },
+    );
   }
 }

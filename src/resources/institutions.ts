@@ -16,9 +16,9 @@ export class InstitutionsResource {
    * @returns List of institutions
    */
   async list(country: string): Promise<Integration[]> {
-    return this.http.get<Integration[]>(
-      `api/v2/institutions/?country=${country}`,
-    );
+    return this.http.get<Integration[]>('api/v2/institutions/', {
+      searchParams: { country },
+    });
   }
 
   /**

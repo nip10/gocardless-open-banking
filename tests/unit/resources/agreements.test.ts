@@ -58,6 +58,12 @@ describe('AgreementsResource', () => {
       expect(result).toEqual(mockAgreementList);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
         'api/v2/agreements/enduser/',
+        {
+          searchParams: {
+            limit: undefined,
+            offset: undefined,
+          },
+        },
       );
     });
 
@@ -75,7 +81,13 @@ describe('AgreementsResource', () => {
 
       expect(result).toEqual(mockAgreementList);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/agreements/enduser/?limit=10',
+        'api/v2/agreements/enduser/',
+        {
+          searchParams: {
+            limit: 10,
+            offset: undefined,
+          },
+        },
       );
     });
 
@@ -93,7 +105,13 @@ describe('AgreementsResource', () => {
 
       expect(result).toEqual(mockAgreementList);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/agreements/enduser/?offset=20',
+        'api/v2/agreements/enduser/',
+        {
+          searchParams: {
+            limit: undefined,
+            offset: 20,
+          },
+        },
       );
     });
 
@@ -111,7 +129,13 @@ describe('AgreementsResource', () => {
 
       expect(result).toEqual(mockAgreementList);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
-        'api/v2/agreements/enduser/?limit=10&offset=20',
+        'api/v2/agreements/enduser/',
+        {
+          searchParams: {
+            limit: 10,
+            offset: 20,
+          },
+        },
       );
     });
 
@@ -133,6 +157,12 @@ describe('AgreementsResource', () => {
       expect(result).toEqual(mockAgreementList);
       expect(mockHttpClient.get).toHaveBeenCalledWith(
         'api/v2/agreements/enduser/',
+        {
+          searchParams: {
+            limit: undefined,
+            offset: undefined,
+          },
+        },
       );
     });
 
