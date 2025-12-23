@@ -36,7 +36,7 @@
     }
   },
   "scripts": {
-    "generate:types": "openapi-ts -i ./docs/spec.json -o ./src/types/generated -c @hey-api/client-ky && node scripts/fix-generated-imports.js",
+    "generate:types": "openapi-ts -i https://bankaccountdata.gocardless.com/api/swagger.json -o ./src/types/generated -c @hey-api/client-ky && node scripts/fix-generated-imports.js",
     "build": "pnpm generate:types && tsup",
     "dev": "pnpm generate:types && tsup --watch",
     "lint": "eslint .",
