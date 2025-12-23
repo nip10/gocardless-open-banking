@@ -4,9 +4,11 @@ import type {
   RetryConfig,
   RequestInterceptor,
   ResponseInterceptor,
+  RateLimitCallback,
 } from '../types/config.js';
 import { GoCardlessAPIError } from '../errors/api-error.js';
 import { calculateBackoff, sleep } from '../utils/backoff.js';
+import { parseRateLimitHeaders, type RateLimitInfo } from '../types/rate-limit.js';
 
 /**
  * HTTP Client
@@ -22,6 +24,8 @@ export class HttpClient {
   private readonly retryConfig: Required<RetryConfig>;
   private readonly requestInterceptors: RequestInterceptor[];
   private readonly responseInterceptors: ResponseInterceptor[];
+  private readonly onRateLimit?: RateLimitCallback;
+  private lastRateLimit?: RateLimitInfo;
 
   constructor(
     private readonly tokenManager: TokenManager,
@@ -32,6 +36,7 @@ export class HttpClient {
       request?: RequestInterceptor[];
       response?: ResponseInterceptor[];
     },
+    onRateLimit?: RateLimitCallback,
   ) {
     this.retryConfig = {
       maxRetries: retryConfig.maxRetries ?? 2,
@@ -44,6 +49,7 @@ export class HttpClient {
 
     this.requestInterceptors = interceptors?.request ?? [];
     this.responseInterceptors = interceptors?.response ?? [];
+    this.onRateLimit = onRateLimit;
 
     // Create Ky instance with base configuration
     this.client = ky.create({
@@ -128,6 +134,24 @@ export class HttpClient {
   }
 
   /**
+   * Get the last captured rate limit information
+   */
+  getLastRateLimitInfo(): RateLimitInfo | undefined {
+    return this.lastRateLimit;
+  }
+
+  /**
+   * Process rate limit headers from response
+   */
+  private processRateLimitHeaders(headers: Headers): void {
+    const rateLimit = parseRateLimitHeaders(headers);
+    if (rateLimit) {
+      this.lastRateLimit = rateLimit;
+      this.onRateLimit?.(rateLimit);
+    }
+  }
+
+  /**
    * Execute request with automatic retry logic
    */
   private async requestWithRetry<T>(
@@ -145,6 +169,9 @@ export class HttpClient {
           method,
         });
 
+        // Process rate limit headers from successful response
+        this.processRateLimitHeaders(response.headers);
+
         return (await response.json()) as T;
       } catch (error) {
         // Transform error to GoCardlessAPIError
@@ -158,6 +185,12 @@ export class HttpClient {
             status_code?: number;
           };
 
+          // Process rate limit headers from error response
+          this.processRateLimitHeaders(response.headers);
+
+          // Parse rate limit headers for error object
+          const rateLimit = parseRateLimitHeaders(response.headers);
+
           // Parse retry-after time if available
           let retryAfter: number | null = null;
           if (response.status === 429) {
@@ -170,6 +203,7 @@ export class HttpClient {
           lastError = GoCardlessAPIError.fromResponse(
             response.status,
             body,
+            rateLimit,
             retryAfter ? { retryAfter } : undefined,
           );
 

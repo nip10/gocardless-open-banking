@@ -6,6 +6,7 @@ import { AgreementsResource } from './resources/agreements.js';
 import { InstitutionsResource } from './resources/institutions.js';
 import type { GoCardlessClientConfig } from './types/config.js';
 import { DEFAULT_CONFIG } from './types/config.js';
+import type { RateLimitInfo } from './types/rate-limit.js';
 
 /**
  * GoCardless Open Banking Client
@@ -78,6 +79,7 @@ export class GoCardlessClient {
       timeout,
       retryConfig,
       config.interceptors,
+      config.onRateLimit,
     );
 
     // Initialize resource groups
@@ -85,5 +87,14 @@ export class GoCardlessClient {
     this.requisitions = new RequisitionsResource(this.httpClient);
     this.agreements = new AgreementsResource(this.httpClient);
     this.institutions = new InstitutionsResource(this.httpClient);
+  }
+
+  /**
+   * Get the last captured rate limit information from API responses
+   *
+   * @returns Rate limit information including limits, remaining requests, and reset times
+   */
+  getLastRateLimitInfo(): RateLimitInfo | undefined {
+    return this.httpClient.getLastRateLimitInfo();
   }
 }

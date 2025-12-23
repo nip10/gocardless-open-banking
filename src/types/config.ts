@@ -1,3 +1,5 @@
+import type { RateLimitInfo } from './rate-limit.js';
+
 /**
  * Request interceptor function type
  */
@@ -7,6 +9,11 @@ export type RequestInterceptor = (config: RequestConfig) => RequestConfig | Prom
  * Response interceptor function type
  */
 export type ResponseInterceptor = (response: Response) => Response | Promise<Response>;
+
+/**
+ * Rate limit callback function type
+ */
+export type RateLimitCallback = (rateLimit: RateLimitInfo) => void;
 
 /**
  * Request configuration
@@ -89,6 +96,12 @@ export interface GoCardlessClientConfig {
     request?: RequestInterceptor[];
     response?: ResponseInterceptor[];
   };
+
+  /**
+   * Callback invoked whenever rate limit headers are received
+   * Useful for monitoring and logging rate limit status
+   */
+  onRateLimit?: RateLimitCallback;
 }
 
 /**

@@ -19,6 +19,9 @@ export type {
   RequestConfig,
 } from './types/config.js';
 
+// Rate limit types
+export type { RateLimitInfo } from './types/rate-limit.js';
+
 // Re-export generated types for public use (from types.gen.ts to avoid SDK imports)
 export type {
   Account,

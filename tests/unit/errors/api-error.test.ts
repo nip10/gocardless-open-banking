@@ -10,6 +10,7 @@ describe('GoCardlessAPIError', () => {
         'NOT_FOUND',
         'Resource not found',
         'Not found',
+        undefined, // rateLimit
         { foo: 'bar' },
       );
 
@@ -66,6 +67,7 @@ describe('GoCardlessAPIError', () => {
           summary: 'Rate limit exceeded',
           detail: 'Please try again in 60 seconds',
         },
+        undefined, // rateLimit
         { retryAfter: 60 },
       );
 
@@ -137,6 +139,15 @@ describe('GoCardlessAPIError', () => {
       expect(error.code).toBe('AUTHENTICATION_FAILED');
     });
 
+    it('should map 402 to PAYMENT_REQUIRED', () => {
+      const error = GoCardlessAPIError.fromResponse(402, {
+        summary: 'Payment required',
+        detail: 'Free usage limit exceeded',
+      });
+
+      expect(error.code).toBe('PAYMENT_REQUIRED');
+    });
+
     it('should map 403 with IP to IP_NOT_WHITELISTED', () => {
       const error = GoCardlessAPIError.fromResponse(403, {
         summary: 'IP address not whitelisted',
@@ -153,6 +164,15 @@ describe('GoCardlessAPIError', () => {
       });
 
       expect(error.code).toBe('FORBIDDEN');
+    });
+
+    it('should map 409 to CONFLICT', () => {
+      const error = GoCardlessAPIError.fromResponse(409, {
+        summary: 'Conflict',
+        detail: 'Account is suspended',
+      });
+
+      expect(error.code).toBe('CONFLICT');
     });
 
     it('should map 400 to VALIDATION_ERROR', () => {

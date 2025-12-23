@@ -188,18 +188,23 @@ class GoCardlessAPIError extends Error {
 ```
 
 ### Error Codes
-Mapped from API responses:
+Mapped from API responses (sorted by HTTP status code):
+- `VALIDATION_ERROR` (400)
+- `AUTHENTICATION_FAILED` (401)
+- `PAYMENT_REQUIRED` (402) - Free usage limit exceeded
+- `FORBIDDEN` (403)
+- `IP_NOT_WHITELISTED` (403)
 - `ACCOUNT_NOT_FOUND` (404)
 - `TRANSACTION_NOT_FOUND` (404)
 - `REQUISITION_NOT_FOUND` (404)
+- `AGREEMENT_NOT_FOUND` (404)
+- `CONFLICT` (409) - Account suspended or processing delay
 - `RATE_LIMIT_EXCEEDED` (429)
-- `AUTHENTICATION_FAILED` (401)
-- `IP_NOT_WHITELISTED` (403)
-- `VALIDATION_ERROR` (400)
 - `INTERNAL_SERVER_ERROR` (500)
 - `BAD_GATEWAY` (502)
 - `SERVICE_UNAVAILABLE` (503)
 - `GATEWAY_TIMEOUT` (504)
+- `UNKNOWN_ERROR` (other status codes)
 
 ### Usage Pattern
 ```typescript
@@ -265,6 +270,64 @@ SDK parses API error messages for retry timing:
 - Extract `time_left` and use as delay
 - Override calculated backoff if present
 
+### Rate Limit Monitoring
+
+The SDK provides comprehensive rate limit monitoring using API response headers:
+
+```typescript
+interface RateLimitInfo {
+  general?: {
+    limit?: number;      // Total requests allowed per day
+    remaining?: number;  // Remaining requests for today
+    reset?: number;      // Unix timestamp when limit resets
+  };
+  accountSuccess?: {
+    limit?: number;      // Total successful account requests allowed per day
+    remaining?: number;  // Remaining successful account requests
+    reset?: number;      // Unix timestamp when account limit resets
+  };
+}
+```
+
+**Features:**
+1. **Real-time Callback:** `onRateLimit` callback invoked whenever rate limit headers are received
+2. **Getter Method:** `getLastRateLimitInfo()` returns the most recent rate limit information
+3. **Automatic Capture:** Rate limit headers captured from both successful and error responses
+4. **Error Integration:** Rate limit info included in `GoCardlessAPIError` for 429 responses
+
+**Usage:**
+
+```typescript
+// Option 1: Real-time callback
+const client = new GoCardlessClient({
+  secretId: '...',
+  secretKey: '...',
+  onRateLimit: (rateLimit) => {
+    console.log(`Remaining: ${rateLimit.general?.remaining}/${rateLimit.general?.limit}`);
+  }
+});
+
+// Option 2: Getter method
+await client.institutions.list('GB');
+const rateLimit = client.getLastRateLimitInfo();
+if (rateLimit?.general?.remaining < 100) {
+  console.warn('Approaching rate limit!');
+}
+
+// Option 3: From error
+try {
+  await client.accounts.get('account-id');
+} catch (error) {
+  if (error instanceof GoCardlessAPIError) {
+    const { rateLimit } = error;
+    if (rateLimit?.general) {
+      const resetDate = new Date(rateLimit.general.reset * 1000);
+      console.log(`Rate limit resets at: ${resetDate.toISOString()}`);
+    }
+  }
+}
+```
+
 ### User Configuration
 ```typescript
 const client = new GoCardlessClient({
@@ -274,6 +337,12 @@ const client = new GoCardlessClient({
     maxRetries: 3,
     retryableStatusCodes: [429, 500, 502, 503], // Add 5xx
     backoff: 'exponential',
+  },
+  onRateLimit: (rateLimit) => {
+    // Monitor rate limits in real-time
+    if (rateLimit.general?.remaining < 10) {
+      console.warn('Warning: Approaching rate limit!');
+    }
   }
 });
 ```

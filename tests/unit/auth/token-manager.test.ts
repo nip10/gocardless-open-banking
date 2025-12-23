@@ -223,19 +223,7 @@ describe('TokenManager', () => {
       });
     });
 
-    it.skip('should handle 401 during refresh by regenerating tokens', async () => {
-      // SKIPPED: This test reveals a potential deadlock in the TokenManager implementation.
-      // When refreshAccessToken catches a 401 error and calls generateTokenPair(),
-      // generateTokenPair() checks if this.refreshPromise exists (it does - it's the
-      // current refresh promise), and returns it, creating a circular promise reference.
-      // This causes the test to timeout.
-      //
-      // TODO: Fix the TokenManager implementation to handle this case properly.
-      // Possible solutions:
-      // 1. Clear refreshPromise before calling generateTokenPair() in the 401 catch block
-      // 2. Add a flag to prevent circular promise references
-      // 3. Use a different concurrency control mechanism
-
+    it('should handle 401 during refresh by regenerating tokens', async () => {
       // First response: token pair that expires soon
       const mockTokenPair = {
         access: 'access-token-1',
@@ -264,13 +252,25 @@ describe('TokenManager', () => {
         }),
       };
 
-      mockKyPost.mockReturnValue({
+      // Second call: refresh fails with 401
+      mockKyPost.mockReturnValueOnce({
         json: vi.fn().mockRejectedValue(refreshError),
       });
 
-      // The call may not resolve immediately due to promise handling
-      // but should eventually handle the 401 appropriately
-      await expect(tokenManager.getAccessToken()).rejects.toThrow();
+      // Third call: generateTokenPair succeeds with new tokens
+      const newTokenPair = {
+        access: 'access-token-2',
+        access_expires: 86400,
+        refresh: 'refresh-token-2',
+        refresh_expires: 2592000,
+      };
+      mockKyPost.mockReturnValueOnce({
+        json: vi.fn().mockResolvedValue(newTokenPair),
+      });
+
+      // Should successfully get new token after 401 on refresh
+      const token = await tokenManager.getAccessToken();
+      expect(token).toBe('access-token-2');
     }, 10000);
 
     it('should throw error on non-401 refresh failure', async () => {

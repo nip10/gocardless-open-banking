@@ -1,3 +1,5 @@
+import type { RateLimitInfo } from '../types/rate-limit.js';
+
 /**
  * GoCardless API Error
  *
@@ -25,6 +27,11 @@ export class GoCardlessAPIError extends Error {
   public readonly summary: string;
 
   /**
+   * Rate limit information from response headers
+   */
+  public readonly rateLimit?: RateLimitInfo;
+
+  /**
    * Additional metadata (e.g., retryAfter for rate limits)
    */
   public readonly meta?: Record<string, unknown>;
@@ -35,6 +42,7 @@ export class GoCardlessAPIError extends Error {
     code: string,
     detail: string,
     summary: string,
+    rateLimit?: RateLimitInfo,
     meta?: Record<string, unknown>,
   ) {
     super(message);
@@ -43,6 +51,7 @@ export class GoCardlessAPIError extends Error {
     this.code = code;
     this.detail = detail;
     this.summary = summary;
+    this.rateLimit = rateLimit;
     this.meta = meta;
 
     // Maintains proper stack trace for where error was thrown (V8 only)
@@ -57,6 +66,7 @@ export class GoCardlessAPIError extends Error {
   static fromResponse(
     statusCode: number,
     body: { summary?: string; detail?: string; status_code?: number },
+    rateLimit?: RateLimitInfo,
     meta?: Record<string, unknown>,
   ): GoCardlessAPIError {
     const code = GoCardlessAPIError.getErrorCode(statusCode, body);
@@ -70,6 +80,7 @@ export class GoCardlessAPIError extends Error {
       code,
       detail,
       summary,
+      rateLimit,
       meta,
     );
   }
@@ -94,10 +105,12 @@ export class GoCardlessAPIError extends Error {
 
     if (statusCode === 429) return 'RATE_LIMIT_EXCEEDED';
     if (statusCode === 401) return 'AUTHENTICATION_FAILED';
+    if (statusCode === 402) return 'PAYMENT_REQUIRED';
     if (statusCode === 403) {
       if (summary.includes('ip')) return 'IP_NOT_WHITELISTED';
       return 'FORBIDDEN';
     }
+    if (statusCode === 409) return 'CONFLICT';
     if (statusCode === 400) return 'VALIDATION_ERROR';
     if (statusCode === 500) return 'INTERNAL_SERVER_ERROR';
     if (statusCode === 502) return 'BAD_GATEWAY';
