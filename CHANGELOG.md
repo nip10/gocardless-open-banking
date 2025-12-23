@@ -1,5 +1,11 @@
 # gocardless-open-banking
 
+## 1.0.1
+
+### Patch Changes
+
+- 5c33537: use ky params directly
+
 ## 1.0.0
 
 ### Major Changes
